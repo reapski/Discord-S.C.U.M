@@ -6,8 +6,7 @@ class UserCombo(object):
 
 	def getCurrentUnixTs(self):
 		date = datetime.datetime.now()
-		unixts = int(time.mktime(date.timetuple())*1000) #milliseconds
-		return unixts
+		return int(time.mktime(date.timetuple())*1000)
 
 	def constructEmojiDict(self, emoji, animatedEmoji):
 		if emoji != None:
@@ -23,7 +22,7 @@ class UserCombo(object):
 		return emojiDict
 
 	def constructActivitiesList(self, updates={}, remove=None): #update is a bit too raw, will fix later
-		currentActivities = self.gatewayobj.session.userSettings["activities"]		
+		currentActivities = self.gatewayobj.session.userSettings["activities"]
 		activities = {4: {}, 0: {}, 1: {}, 2: {}, 3: {}}
 		for i in currentActivities: #all this does is fix the format of current activities
 			if remove!=i: #this helps remove activities
@@ -43,8 +42,7 @@ class UserCombo(object):
 					activities[i]["emoji"] = self.constructEmojiDict(emojiStr, animatedEmoji)
 		for i in updates: #this adds activities
 			activities[i] = updates[i]
-		activitiesList = [activities[j] for j in activities if len(activities[j])>0]
-		return activitiesList
+		return [activities[j] for j in activities if len(activities[j])>0]
 
 	def setStatus(self, status):
 		if status != self.gatewayobj.session.userSettings["status"]:

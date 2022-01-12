@@ -80,7 +80,7 @@ class Color:
 		else:
 			raise ValueError("Expected either decimal, hex, or rgb input.")
 		#parse c (color input)
-		if isinstance(c, tuple) or isinstance(c, list):
+		if isinstance(c, (tuple, list)):
 			result = Color.from_rgb(c)
 		elif isinstance(c, str):
 			if c.startswith("0x"):
@@ -91,10 +91,7 @@ class Color:
 					result = Color.get_random_color()
 				else:
 					key = c.replace("gray", "grey")
-					if key in Color.colors:
-						result = Color.colors[key]
-					else:
-						result = int(c, 16)
+					result = Color.colors[key] if key in Color.colors else int(c, 16)
 		else:
 			result = c
 		return result

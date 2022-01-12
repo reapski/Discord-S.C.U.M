@@ -22,11 +22,13 @@ class Science(object):
 
     def getTrackingProperties(self, duration="random"):
         now = self.getCurrentUnixMS()
-        trackingProperties = {"client_track_timestamp": now}
-        if duration == "random":
-            trackingProperties["client_send_timestamp"] = now+random.randint(40, 1000)
-        else:
-            trackingProperties["client_send_timestamp"] = now+duration
+        trackingProperties = {
+            'client_track_timestamp': now,
+            'client_send_timestamp': now + random.randint(40, 1000)
+            if duration == "random"
+            else now + duration,
+        }
+
         trackingProperties["client_uuid"] = self.UUIDobj.calculate(eventNum="default", userID="default", increment=True)
         return trackingProperties
 
@@ -40,8 +42,7 @@ class Science(object):
             else:
                 self.UUIDobj.eventNum += 1
         body = {'token': self.analytics_token, 'events':events}
-        if self.analytics_token == None: #if not logged in. ex: bot=discum.Client(token='poop')
-            headerModifications = {"update":{"X-fingerprint": self.xfingerprint}, "remove": ["Authorization"]}
-            return Wrapper.sendRequest(self.s, 'post', url, body, headerModifications=headerModifications, log=self.log)
-        else:
+        if self.analytics_token is not None:
             return Wrapper.sendRequest(self.s, 'post', url, body, log=self.log)
+        headerModifications = {"update":{"X-fingerprint": self.xfingerprint}, "remove": ["Authorization"]}
+        return Wrapper.sendRequest(self.s, 'post', url, body, headerModifications=headerModifications, log=self.log)

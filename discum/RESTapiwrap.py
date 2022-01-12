@@ -30,8 +30,7 @@ class Wrapper:
 	def brdecompress(payload, log):
 		try:
 			import brotli
-			data = brotli.decompress(payload)
-			return data
+			return brotli.decompress(payload)
 		except Exception:
 			Logger.log("Either brotli decompress failed or discord returned incorrect content encodings.", None, log) #yea, it happens :/
 			return payload
@@ -39,17 +38,16 @@ class Wrapper:
 	#header modifications, like endpoints that don't need auth, superproperties, etc; also for updating headers like xfingerprint
 	@staticmethod
 	def editedReqSession(reqsession, headerModifications):
-		if headerModifications not in ({}, None):
-			editedSession = copy.deepcopy(reqsession)
-			if "update" in headerModifications:
-				editedSession.headers.update(headerModifications["update"])
-			if "remove" in headerModifications:
-				for header in headerModifications["remove"]:
-					if header in editedSession.headers:
-						del editedSession.headers[header]
-			return editedSession
-		else:
+		if headerModifications in ({}, None):
 			return reqsession
+		editedSession = copy.deepcopy(reqsession)
+		if "update" in headerModifications:
+			editedSession.headers.update(headerModifications["update"])
+		if "remove" in headerModifications:
+			for header in headerModifications["remove"]:
+				if header in editedSession.headers:
+					del editedSession.headers[header]
+		return editedSession
 
 	#only for "Connection reset by peer" errors. Influenced by praw's retry code
 	@staticmethod
@@ -83,10 +81,7 @@ class Wrapper:
 			# 4. format body and log
 			data = {} #now onto the body (if exists)
 			if body != None:
-				if isinstance(body, dict):
-					data = {'data': json.dumps(body)}
-				else:
-					data = {'data': body}
+				data = {'data': json.dumps(body)} if isinstance(body, dict) else {'data': body}
 				if log:
 					text, color = Wrapper.logFormatter(function_name, body, part="body")
 					Logger.log(text, color, log)

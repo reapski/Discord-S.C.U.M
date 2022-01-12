@@ -15,11 +15,7 @@ class Client_UUID(object): #Huge thanks to github user fweak for helping me figu
     def calculate(self, eventNum, userID, increment):
         if eventNum == "default":
             eventNum = self.eventNum
-        if userID == "default":
-            userID = self.userID
-        else:
-            userID = int(userID)
-
+        userID = self.userID if userID == "default" else int(userID)
         buf = bytearray(struct.pack('24x'))
         buf[0:4] = struct.pack("<i", userID%4294967296 if userID%4294967296<=2147483647 else userID%4294967296-2147483647)
         buf[4:8] = struct.pack("<i", userID>>32)
@@ -43,13 +39,21 @@ class Client_UUID(object): #Huge thanks to github user fweak for helping me figu
     @staticmethod
     def parse(client_uuid):
         decoded_client_uuid = base64.b64decode(client_uuid)
-        unpacked = []
-        for i in range(6):
-            unpacked.append(struct.unpack('<i', decoded_client_uuid[4*i:4*i+4])[0])
-        UUIDdata = {}
+        unpacked = [
+            struct.unpack('<i', decoded_client_uuid[4 * i : 4 * i + 4])[0]
+            for i in range(6)
+        ]
+
         userIDguess = (unpacked[1]<<32) + unpacked[0]
-        UUIDdata['userID'] = repr(userIDguess if userIDguess%4294967296<=2147483647 else userIDguess+4294967296)
-        UUIDdata['randomPrefix'] = unpacked[2]
+        UUIDdata = {
+            'userID': repr(
+                userIDguess
+                if userIDguess % 4294967296 <= 2147483647
+                else userIDguess + 4294967296
+            ),
+            'randomPrefix': unpacked[2],
+        }
+
         creationTimeGuess = (unpacked[4]<<32) + unpacked[3]
         UUIDdata['creationTime'] = creationTimeGuess if creationTimeGuess%4294967296<=2147483647 else userIDguess+4294967296
         UUIDdata['eventNum'] = unpacked[5]

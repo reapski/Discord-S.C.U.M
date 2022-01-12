@@ -155,19 +155,19 @@ class GatewayServer:
 			"User-Agent": self.super_properties["browser_user_agent"]
 		} #more info: https://stackoverflow.com/a/40675547
 
-		ws = websocket.WebSocketApp(websocketurl,
-									header = headers,
-									on_open=lambda ws: self.on_open(ws),
-									on_message=lambda ws, msg: self.on_message(ws, msg),
-									on_error=lambda ws, msg: self.on_error(ws, msg),
-									on_close=lambda ws, close_code, close_msg: self.on_close(ws, close_code, close_msg)
-									)
-		return ws
+		return websocket.WebSocketApp(
+		    websocketurl,
+		    header=headers,
+		    on_open=lambda ws: self.on_open(ws),
+		    on_message=lambda ws, msg: self.on_message(ws, msg),
+		    on_error=lambda ws, msg: self.on_error(ws, msg),
+		    on_close=lambda ws, close_code, close_msg: self.on_close(
+		        ws, close_code, close_msg),
+		)
 
 	def decompress(self, bmessage): #input is byte message
 		data = self._zlib.decompress(bmessage)
-		jsonmessage = json.loads(data.decode("UTF8"))
-		return jsonmessage
+		return json.loads(data.decode("UTF8"))
 
 	def on_open(self, ws):
 		self.connected = True
@@ -175,10 +175,10 @@ class GatewayServer:
 		Logger.log("[gateway] Connected to websocket.", None, self.log)
 		if not self.resumable:
 			#send presences if 1 or more activites in previous session. Whether or not you're invisible doesn't matter apparently.
-			if len(self.session.settings_ready) != 0:
-				if self.session.userSettings.get("activities") not in (None, {}):
-					self.auth["presence"]["status"] = self.session.userSettings.get("status")
-					self.auth["presence"]["activities"] = UserCombo(self).constructActivitiesList()
+			if len(self.session.settings_ready) != 0 and self.session.userSettings.get(
+			    "activities") not in (None, {}):
+				self.auth["presence"]["status"] = self.session.userSettings.get("status")
+				self.auth["presence"]["activities"] = UserCombo(self).constructActivitiesList()
 			self.send({"op": self.OPCODE.IDENTIFY, "d": self.auth})
 		else:
 			self.resumable = False
@@ -203,16 +203,13 @@ class GatewayServer:
 			self._last_err = InvalidSessionException("Invalid Session Error.")
 			if self.resumable:
 				self.resumable = False
-				self.sequence = 0
-				self.close()
-			else:
-				self.sequence = 0
-				self.close()
+			self.sequence = 0
+			self.close()
 		elif response['op'] == self.OPCODE.RECONNECT:
 			Logger.log("[gateway] Received opcode 7 (reconnect).", None, self.log)
 			self._last_err = NeedToReconnectException("Discord sent an opcode 7 (reconnect).")
 			self.close()
-		if self.interval == None:
+		if self.interval is None:
 			Logger.log("[gateway] Identify failed.", None, self.log)
 			self.close()
 		if resp.event.ready:
@@ -311,7 +308,6 @@ class GatewayServer:
 					del self._after_message_hooks[commandsCopy.index(func)]
 		except ValueError:
 			Logger.log('{} not found in _after_message_hooks.'.format(func), None, self.log)
-			pass
 
 	def clearCommands(self):
 		self._after_message_hooks = []
@@ -340,20 +336,19 @@ class GatewayServer:
 					Logger.log("[gateway] Connection forcibly closed using Keyboard Interrupt.", None, self.log)
 					break
 				except Exception as e:
-					if auto_reconnect:
-						if not exceptionChecker(e, [KeyboardInterrupt]):
-							if exceptionChecker(e, [ConnectionResumableException]):
-								self._last_err = None
-								waitTime = random.randrange(1,6)
-								Logger.log("[gateway] Connection Dropped. Attempting to resume last valid session in {} seconds.".format(waitTime), None, self.log)
-								time.sleep(waitTime)
-							elif exceptionChecker(e, [ConnectionManuallyClosedException]):
-								Logger.log("[gateway] Connection forcibly closed using close function.", None, self.log)
-								break
-							else:
-								self.resetSession()
-								Logger.log("[gateway] Connection Dropped. Retrying in 10 seconds.", None, self.log)
-								time.sleep(10)
+					if auto_reconnect and not exceptionChecker(e, [KeyboardInterrupt]):
+						if exceptionChecker(e, [ConnectionResumableException]):
+							self._last_err = None
+							waitTime = random.randrange(1,6)
+							Logger.log("[gateway] Connection Dropped. Attempting to resume last valid session in {} seconds.".format(waitTime), None, self.log)
+							time.sleep(waitTime)
+						elif exceptionChecker(e, [ConnectionManuallyClosedException]):
+							Logger.log("[gateway] Connection forcibly closed using close function.", None, self.log)
+							break
+						else:
+							self.resetSession()
+							Logger.log("[gateway] Connection Dropped. Retrying in 10 seconds.", None, self.log)
+							time.sleep(10)
 		else:
 			self._zlib = zlib.decompressobj()
 			self.ws.run_forever(ping_interval=10, ping_timeout=5, http_proxy_host=self.proxy_host, http_proxy_port=self.proxy_port)
@@ -478,7 +473,8 @@ class GatewayServer:
 	def finishedGuildSearch(self, guildIDs, query="", saveAsQueryOverride=None, userIDs=None, keep=False):
 		if isinstance(guildIDs, str):
 			guildIDs = [guildIDs]
-		saveAsQuery = query.lower() if saveAsQueryOverride==None else saveAsQueryOverride.lower()
+		saveAsQuery = (query.lower() if saveAsQueryOverride is None else
+		               saveAsQueryOverride.lower())
 		command = {
 			"function": GuildCombo(self).handleGuildMemberSearches,
 			"params": {
@@ -489,18 +485,17 @@ class GatewayServer:
 				"keep": keep
 			},
 		}
-		if keep == False: #if keep param not provided, look if params are subset of command_list function params
-			command["params"].pop("keep")
-			for c in self._after_message_hooks:
-				if isinstance(c, dict):
-					if c.get("function").__func__ == GuildCombo(self).handleGuildMemberSearches.__func__:
-						d1 = command["params"]
-						d2 = c.get("params", {})
-						if all(key in d2 and d2[key] == d1[key] for key in d1): #https://stackoverflow.com/a/41579450/14776493
-							return False #not finished yet with guild search
-			return True
-		else:
+		if keep != False:
 			return command not in self._after_message_hooks
+		command["params"].pop("keep")
+		for c in self._after_message_hooks:
+			if (isinstance(c, dict) and c.get("function").__func__ == GuildCombo(
+			    self).handleGuildMemberSearches.__func__):
+				d1 = command["params"]
+				d2 = c.get("params", {})
+				if all(key in d2 and d2[key] == d1[key] for key in d1): #https://stackoverflow.com/a/41579450/14776493
+					return False #not finished yet with guild search
+		return True
 
 	'''
 	User stuff

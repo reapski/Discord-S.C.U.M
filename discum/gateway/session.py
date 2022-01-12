@@ -62,11 +62,10 @@ class Session:
 	#friends
 	@property
 	def friends(self):
-		f = {}
-		for i in self.relationships: #where i is a user id
-			if self.relationships[i]['type'] == 'friend':
-				f[i] = self.relationships[i]
-		return f
+		return {
+		    i: self.relationships[i]
+		    for i in self.relationships if self.relationships[i]['type'] == 'friend'
+		}
 	
 	@property
 	def friendIDs(self):
@@ -75,11 +74,10 @@ class Session:
 	#blocked	
 	@property
 	def blocked(self):
-		b = {}
-		for i in self.relationships: #where i is a user id
-			if self.relationships[i]['type'] == 'blocked':
-				b[i] = self.relationships[i]
-		return b
+		return {
+		    i: self.relationships[i]
+		    for i in self.relationships if self.relationships[i]['type'] == 'blocked'
+		}
 	
 	@property
 	def blockedIDs(self):
@@ -88,11 +86,11 @@ class Session:
 	#incoming	
 	@property
 	def incomingFriendRequests(self):
-		ifr = {}
-		for i in self.relationships:
-			if self.relationships[i]['type'] == 'pending_incoming':
-				ifr[i] = self.relationships[i]
-		return ifr
+		return {
+		    i: self.relationships[i]
+		    for i in self.relationships
+		    if self.relationships[i]['type'] == 'pending_incoming'
+		}
 	
 	@property
 	def incomingFriendRequestIDs(self):
@@ -101,11 +99,11 @@ class Session:
 	#outgoing
 	@property
 	def outgoingFriendRequests(self):
-		ofr = {}
-		for i in self.relationships:
-			if self.relationships[i]['type'] == 'pending_outgoing':
-				ofr[i] = self.relationships[i]
-		return ofr
+		return {
+		    i: self.relationships[i]
+		    for i in self.relationships
+		    if self.relationships[i]['type'] == 'pending_outgoing'
+		}
 	
 	@property
 	def outgoingFriendRequestIDs(self):
@@ -388,11 +386,11 @@ class guild(Session):
 
 	@property
 	def categories(self): #all data about guild categories, can be overwhelming
-		all_categories = {}
-		for i in self.channelsAndCategories: #https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-			if self.channelsAndCategories[i]['type'] == 4:
-				all_categories[i] = self.channelsAndCategories[i]
-		return all_categories
+		return {
+		    i: self.channelsAndCategories[i]
+		    for i in self.channelsAndCategories
+		    if self.channelsAndCategories[i]['type'] == 4
+		}
 
 	@property
 	def categoryIDs(self):
@@ -403,11 +401,11 @@ class guild(Session):
 
 	@property
 	def channels(self): #all data about all guild channels, can be overwhelming
-		all_channels = {}
-		for i in self.channelsAndCategories: #https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-			if self.channelsAndCategories[i]['type'] != 4:
-				all_channels[i] = self.channelsAndCategories[i]
-		return all_channels
+		return {
+		    i: self.channelsAndCategories[i]
+		    for i in self.channelsAndCategories
+		    if self.channelsAndCategories[i]['type'] != 4
+		}
 
 	@property
 	def channelIDs(self):

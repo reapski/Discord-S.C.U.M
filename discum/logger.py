@@ -13,10 +13,7 @@ class Logger:
 		if isinstance(log, bool):
 			log = {"console":log, "file":False}
 		if log["console"]:
-			if color:
-				string = color + text + '\033[m'
-			else:
-				string = text
+			string = color + text + '\033[m' if color else text
 			print(string)
 		if log["file"]:
 			with open(log["file"], 'a+') as f:

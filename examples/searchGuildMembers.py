@@ -66,20 +66,25 @@ def calculateOption(guildID, action): #action == 'append' or 'replace'
 	if action == 'append':
 		lastUserIDs = bot.gateway.guildMemberSearches[guildID]["queries"][''.join(bot.qList)]
 		data = [bot.gateway.session.guild(guildID).members[i] for i in bot.gateway.session.guild(guildID).members if i in lastUserIDs]
-		lastName = sorted(set([re.sub(' +', ' ', j['nick'].lower()) if (j.get('nick') and re.sub(' +', ' ', j.get('nick').lower()).startswith(''.join(bot.qList))) else re.sub(' +', ' ', j['username'].lower()) for j in data]))[-1]
+		lastName = sorted({
+		    re.sub(' +', ' ', j['nick'].lower()) if
+		    (j.get('nick')
+		     and re.sub(' +', ' ',
+		                j.get('nick').lower()).startswith(''.join(bot.qList))) else
+		    re.sub(' +', ' ', j['username'].lower())
+		    for j in data
+		})[-1]
 		try:
-			option = lastName[len(bot.qList)]
-			return option
+			return lastName[len(bot.qList)]
 		except IndexError:
 			return None
 	elif action == 'replace':
-		if bot.qList[-1] in allchars:
-			options = allchars[allchars.index(bot.qList[-1])+1:]
-			if ' ' in options and (len(bot.qList)==1 or (len(bot.qList)>1 and bot.qList[-2]==' ')): #cannot start with a space and cannot have duplicate spaces
-				options.remove(' ')
-			return options
-		else:
+		if bot.qList[-1] not in allchars:
 			return None
+		options = allchars[allchars.index(bot.qList[-1])+1:]
+		if ' ' in options and (len(bot.qList)==1 or (len(bot.qList)>1 and bot.qList[-2]==' ')): #cannot start with a space and cannot have duplicate spaces
+			options.remove(' ')
+		return options
 
 def findReplaceableIndex(guildID):
 	for i in range(len(bot.qList)-2, -1, -1): #assume that the last index is not changable

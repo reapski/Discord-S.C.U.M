@@ -77,19 +77,19 @@ class RemoteAuth:
 			"User-Agent": self.user_agent
 		} #more info: https://stackoverflow.com/a/40675547
 
-		ws = websocket.WebSocketApp(remoteauthurl,
-									header = headers,
-									on_open=lambda ws: self.on_open(ws),
-									on_message=lambda ws, msg: self.on_message(ws, msg),
-									on_error=lambda ws, msg: self.on_error(ws, msg),
-									on_close=lambda ws, close_code, close_msg: self.on_close(ws, close_code, close_msg)
-									)
-		return ws
+		return websocket.WebSocketApp(
+		    remoteauthurl,
+		    header=headers,
+		    on_open=lambda ws: self.on_open(ws),
+		    on_message=lambda ws, msg: self.on_message(ws, msg),
+		    on_error=lambda ws, msg: self.on_error(ws, msg),
+		    on_close=lambda ws, close_code, close_msg: self.on_close(
+		        ws, close_code, close_msg),
+		)
 
 	def decrypt(self, data):
 		decoded = base64.b64decode(data)
-		decrypted = self.decryptor.decrypt(decoded)
-		return decrypted
+		return self.decryptor.decrypt(decoded)
 
 	def parseUserPayload(self, data):
 		user_data = data.decode('utf-8').split(':')
@@ -146,7 +146,7 @@ class RemoteAuth:
 			}
 		elif response['op'] == self.OPCODE.FINISH:
 			self.token = self.decrypt(response['encrypted_token']).decode('utf-8')
-		if self.interval == None:
+		if self.interval is None:
 			Logger.log("[ra] Connection failed.", None, self.log)
 			self.close()
 		thread.start_new_thread(self._response_loop, (response,))
@@ -219,7 +219,6 @@ class RemoteAuth:
 					del self._after_message_hooks[commandsCopy.index(func)]
 		except ValueError:
 			Logger.log('{} not found in _after_message_hooks.'.format(func), None, self.log)
-			pass
 
 	def clearCommands(self):
 		self._after_message_hooks = []

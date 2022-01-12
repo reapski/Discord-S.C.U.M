@@ -604,10 +604,9 @@ class Client:
 		return self.Science.UUIDobj.refresh(resetEventNum)
 
 	def parseClientUUID(self, client_uuid):
-		if self.Science == "":
-			self.Science = Science(self.discord, self.s, self.log, None, "0", "") #no sequential data needed for parsing
-			result = self.Science.UUIDobj.parse(client_uuid)
-			self.Science = "" #reset
-			return result
-		else:
+		if self.Science != "":
 			return self.Science.UUIDobj.parse(client_uuid)
+		self.Science = Science(self.discord, self.s, self.log, None, "0", "") #no sequential data needed for parsing
+		result = self.Science.UUIDobj.parse(client_uuid)
+		self.Science = "" #reset
+		return result
