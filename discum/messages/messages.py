@@ -86,30 +86,23 @@ class Messages(object):
 			a = urlparse(filelocation)
 			if len(os.path.basename(a.path))>0: #if everything is normal...
 				filename = os.path.basename(a.path)
-			else: 
-				if mimetype == 'unsupported': #if filetype not detected and extension not given
-					filename = 'unknown'
-				else: #if filetype detected but extension not given
-					filename = 'unknown.'+extensiontype
+			elif mimetype == 'unsupported': #if filetype not detected and extension not given
+				filename = 'unknown'
+			else: #if filetype detected but extension not given
+				filename = 'unknown.'+extensiontype
 		else: #local file
 			filename = os.path.basename(os.path.normpath(filelocation))
 		#now time to post the file
 		url = self.discord+'channels/'+channelID+'/messages'
+		payload = {"content":message,"tts":tts}
+		if message_reference != None:
+			payload["message_reference"] = message_reference
+			payload["type"] = 19
+		if sticker_ids != None:
+			payload["sticker_ids"] = sticker_ids
 		if isurl:
-			payload = {"content":message,"tts":tts}
-			if message_reference != None:
-				payload["message_reference"] = message_reference
-				payload["type"] = 19
-			if sticker_ids != None:
-				payload["sticker_ids"] = sticker_ids
 			fields={"file":(filename,fd,mimetype), "payload_json":(None,json.dumps(payload))}
 		else:
-			payload = {"content":message,"tts":tts}
-			if message_reference != None:
-				payload["message_reference"] = message_reference
-				payload["type"] = 19
-			if sticker_ids != None:
-				payload["sticker_ids"] = sticker_ids
 			fields={"file":(filename,open(filelocation,'rb').read(),mimetype), "payload_json":(None,json.dumps(payload))}
 		m=MultipartEncoder(fields=fields,boundary='----WebKitFormBoundary'+''.join(random.sample(string.ascii_letters+string.digits,16)))
 		self.s.headers.update({"Content-Type":m.content_type})
@@ -118,7 +111,7 @@ class Messages(object):
 		return response
 
 	def reply(self, channelID, messageID, message, nonce, tts, embed, allowed_mentions, sticker_ids, file, isurl):
-		if file == None:
+		if file is None:
 			self.sendMessage(channelID, message, nonce=nonce, tts=tts, embed=embed, message_reference={"channel_id":channelID,"message_id":messageID}, allowed_mentions=allowed_mentions, sticker_ids=sticker_ids)
 		else:
 			self.sendFile(channelID, file, isurl=isurl, message=message, tts=tts, message_reference={"channel_id":channelID,"message_id":messageID}, sticker_ids=sticker_ids)

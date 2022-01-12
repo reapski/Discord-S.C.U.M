@@ -17,17 +17,17 @@ class GuildRequest(object):
 		        "thread_member_lists": thread_member_lists
 		    },
 		}
-		if channel_ranges == None:
+		if channel_ranges is None:
 			data["d"].pop("channels")
-		if typing == None:
+		if typing is None:
 			data["d"].pop("typing")
-		if threads == None:
+		if threads is None:
 			data["d"].pop("threads")
-		if activities == None:
+		if activities is None:
 			data["d"].pop("activities")
-		if members == None:
+		if members is None:
 			data["d"].pop("members")
-		if thread_member_lists == None:
+		if thread_member_lists is None:
 			data["d"].pop("thread_member_lists")
 		self.gatewayobject.send(data)
 

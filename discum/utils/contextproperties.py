@@ -8,8 +8,7 @@ class ContextProperties(object):
 	@staticmethod
 	def encodeData(data):
 		binaryData = json.dumps(data).encode()
-		encodedData = base64.b64encode(binaryData).decode("utf-8")
-		return encodedData
+		return base64.b64encode(binaryData).decode("utf-8")
 
 	@staticmethod
 	def get(location, guild_id=None, channel_id=None, channel_type=None):

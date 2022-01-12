@@ -22,16 +22,21 @@ def helloworld(resp):
             bot.sendMessage(m['channel_id'], 'reply to one of my messages and I will make you a server :)')
         if m['author']['id'] == bot.gateway.session.user['id']:
             return
-        if m['type'] == 'reply':
-            if 'referenced_message' in m and m['referenced_message']['author']['id'] == bot.gateway.session.user['id'] and 'guild_id' not in m:
-                time.sleep(1) #instant replies make ppl think ur running a selfbot so...
-                channelID = m['channel_id']
-                baseURL = "https://discord.com/api/channels/{}/messages".format(channelID)
-                POSTedJSON =  json.dumps ({"content":"The server Gods have allowed me to grant you the server badge. You are now a server :).","nonce":None,"tts":False,"message_reference":{"guild_id":None,"channel_id":m['channel_id'],"message_id":m['id']},"allowed_mentions":{"parse":["users","roles","everyone"],"replied_user":False}})
-                try:
-                    bot.s.post(baseURL, data=POSTedJSON)
-                except:
-                    bot.s.post(baseURL, data=POSTedJSON)
-                time.sleep(2) #instant replies make ppl think ur running a selfbot so...
+        if (
+            m['type'] == 'reply'
+            and 'referenced_message' in m
+            and m['referenced_message']['author']['id']
+            == bot.gateway.session.user['id']
+            and 'guild_id' not in m
+        ):
+            time.sleep(1) #instant replies make ppl think ur running a selfbot so...
+            channelID = m['channel_id']
+            baseURL = "https://discord.com/api/channels/{}/messages".format(channelID)
+            POSTedJSON =  json.dumps ({"content":"The server Gods have allowed me to grant you the server badge. You are now a server :).","nonce":None,"tts":False,"message_reference":{"guild_id":None,"channel_id":m['channel_id'],"message_id":m['id']},"allowed_mentions":{"parse":["users","roles","everyone"],"replied_user":False}})
+            try:
+                bot.s.post(baseURL, data=POSTedJSON)
+            except:
+                bot.s.post(baseURL, data=POSTedJSON)
+            time.sleep(2) #instant replies make ppl think ur running a selfbot so...
 
 bot.gateway.run()

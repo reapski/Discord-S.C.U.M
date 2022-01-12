@@ -51,8 +51,8 @@ class SuperProperties:
             "client_build_number": 85108,
             "client_event_source": None
         }
-        if locale == None:
-        	sp.pop("system_locale")
+        if locale is None:
+            sp.pop("system_locale")
         if self.buildnum == "request":
             reqbuildnum = self.requestBuildNumber()
             if reqbuildnum != None:
